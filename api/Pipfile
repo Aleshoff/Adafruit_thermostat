@@ -10,6 +10,7 @@ python-dotenv = "*"
 flask-cors = "*"
 pymongo = "*"
 flask-jwt-extended = "*"
+adafruit-io = "*"
 
 [dev-packages]
 
