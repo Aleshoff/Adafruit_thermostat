@@ -1,13 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import GaugeSetTemp from "./components/GaugeSetTemp";
+import GaugeTemp from "./components/GaugeTemp";
 import axios from "axios";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import Search from "./components/Search";
 import Login from "./components/Login";
-import ImageCard from "./components/ImageCard";
 import { Container, Row, Col, Navbar, Button } from "react-bootstrap";
-import Welcome from "./components/Welcome";
 import Spinner from "./components/Spinner";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,103 +17,44 @@ import SignUp from "./components/SignUp";
 const API_URL = process.env.REACT_APP_API_URL || "https://alolprojectspace.com";
 
 function App() {
-  const [word, setWord] = useState("");
-  const [images, setImages] = useState([]);
+  const [temperature, setTemperature] = useState(23);
+  const [actualTemperature, getTemperature] = useState(0);
   const [loader, setLoader] = useState(true);
   const { token, setToken } = useToken();
   const [isSignUped, setIsSignUped] = useState(true);
 
-  //console.log(images);
-
-  const getSavedImages = async () => {
+  const getActualDashBoard = async () => {
     try {
-      const result = await axios.get(`${API_URL}/images`, {
+      const result = await axios.get(`${API_URL}/dashboard`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setImages(result.data || []);
+      getTemperature(parseFloat(result.data.temperature) || 0);
       setLoader(false);
-      // toast.success("Login Succesful!", {
-      //   toastId: "custom-id-yes"});
     } catch (error) {
       console.log(error);
       toast.error(error.message);
     }
   };
 
-  // useEffect(() => {
-  //   getSavedImages();
-  // }, []);
-
-  useMemo(() => {
-    if (token) getSavedImages();
+  useEffect(() => {
+    if (token) {
+      getActualDashBoard();
+    }
   }, [token]);
 
-  const handleSearchSubmit = async (event) => {
-    event.preventDefault();
-    //console.log(word);
-    // fetch(
-    //   `${API_URL}/new-photo?query=${word}`
-    // )
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     setImages([{ ...data, title: word }, ...images]);
-    //   })
-    //   .catch((error) => console.log(error));
-
-    try {
-      const result = await axios.get(`${API_URL}/new-photo?query=${word}`);
-      setImages([{ ...result.data, title: word }, ...images]);
-      toast.info(`New Image ${word.toUpperCase()} was found!`);
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+  useMemo(() => {
+    if (token) {
+      const interval = setInterval(() => {
+        getActualDashBoard();
+      }, 5000);
+      return () => clearInterval(interval);
     }
-    setWord("");
-  };
+  }, [token]);
 
-  const handleDeleteImage = async (id) => {
-    const imageToDelete = images.find((image) => image.id === id);
+  useEffect(() => {
+    
+  }, [temperature]);
 
-    try {
-      const result = await axios.delete(`${API_URL}/images/${id}`, {
-        data: imageToDelete,
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (result.data?.deleted_id) {
-        toast.warn(
-          `Image ${images.find((image) => image.id === id).title.toUpperCase()} was Deleted!`
-        );
-        setImages(images.filter((image) => image.id !== id));
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message);
-    }
-  };
-
-  const handleSavedImage = async (id) => {
-    const imageToSave = images.find((image) => image.id === id);
-    imageToSave.saved = true;
-
-    try {
-      const result = await axios.post(`${API_URL}/images`, imageToSave, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (result.data?.inserted_id) {
-        setImages(
-          images.map((image) =>
-            image.id === id ? { ...image, saved: true } : image
-          )
-        );
-        toast.info(`Image ${imageToSave.title.toUpperCase()} was saved!`);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message);
-    }
-  };
-  //console.log(word);
-  //console.log(UNSPLASH_KEY);
   if (!token) {
     return (
       <div>
@@ -129,7 +69,7 @@ function App() {
     );
   }
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setToken("");
   };
@@ -149,29 +89,17 @@ function App() {
         <Spinner />
       ) : (
         <>
-          <Search
-            word={word}
-            setWord={setWord}
-            handleSubmit={handleSearchSubmit}
-          />
           <Container className="mt-4">
-            {images.length ? (
-              <Row xs={1} md={2} lg={3}>
-                {images.map((image, i) => (
-                  <Col key={i} className="pb-3">
-                    <ImageCard
-                      image={image}
-                      deleteImage={handleDeleteImage}
-                      saveImage={handleSavedImage}
-                    />
-                  </Col>
-                  
-                ))}
-              </Row>
-            ) : (
-              <Welcome />
-            )}
-            <Navbar style={{ maxWidth: "20rem", height: "4rem" }}/>
+            <Row xs={1} md={2} lg={2}>
+              <Col className="pb-3">
+                <GaugeTemp data={actualTemperature} />
+              </Col>
+              <Col className="pb-3">
+                <GaugeSetTemp temp ={temperature} setTemperature={setTemperature} />
+              </Col>
+            </Row>
+
+            <Navbar style={{ maxWidth: "20rem", height: "4rem" }} />
           </Container>
           <Navbar fixed="bottom">
             <Container>

@@ -11,8 +11,9 @@
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.4",
     "react-dom": "^18.3.1",
+    "react-gauge-component": "^1.2.6",
     "react-scripts": "5.0.1",
-    "react-toastify": "^10.0.5",
+    "react-toastify": "^10.0.6",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

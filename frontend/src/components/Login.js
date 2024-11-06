@@ -25,7 +25,7 @@ const loginUser = async (credentials) => {
 };
 
 const showPassword = () => {
-  var x = document.getElementById("showPassword");
+  var x = document.getElementById("formHorizontalPassword");
   if (x.type === "password") {
     x.type = "text";
   } else {
@@ -89,7 +89,7 @@ export default function Login({ setToken, setIsSignUped }) {
           </Form.Label>
           <Col sm={12}>
             <Form.Control
-              id="showPassword"
+              
               type="password"
               placeholder="Password"
               onChange={(e) => setPassword(e.target.value)}

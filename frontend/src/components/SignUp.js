@@ -25,8 +25,8 @@ const signUpUser = async (credentials) => {
 };
 
 const showPassword = () => {
-  var x = document.getElementById("showPassword1");
-  var y = document.getElementById("showPassword2");
+  var x = document.getElementById("formHorizontalPassword");
+  var y = document.getElementById("formHorizontalPassword2");
   if (x.type === "password") {
     x.type = "text";
     y.type = "text";
@@ -103,7 +103,6 @@ export default function SignUp({ setIsSignUped }) {
           </Form.Label>
           <Col sm={12}>
             <Form.Control
-              id="showPassword1"
               type="password"
               placeholder="at least 1 number and 8 symbols"
               onChange={(e) => setPassword2(e.target.value)}
@@ -121,7 +120,6 @@ export default function SignUp({ setIsSignUped }) {
           </Form.Label>
           <Col sm={12}>
             <Form.Control
-              id="showPassword2"
               type="password"
               placeholder="Confirm Password"
               onChange={(e) => setPassword(e.target.value)}
