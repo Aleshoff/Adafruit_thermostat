@@ -17,11 +17,13 @@ users_collection = gallery_db.users
 
 load_dotenv(dotenv_path="./.env.local")
 
-aio = Client('Alesh', 'aio_guOp71p1vgBbwF6YgGobzj7kthRG')
-
 UNSPLASH_URL = "https://api.unsplash.com/photos/random"
 UNSPLASH_KEY = os.environ.get("UNSPLASH_KEY", "")
 DEBUG = bool(os.environ.get("DEBUG", True))
+ADAFRUIT_KEY = os.environ.get("ADAFRUIT_KEY", "")
+ADAFRUIT_NAME = os.environ.get("ADAFRUIT_NAME", "")
+
+aio = Client(ADAFRUIT_NAME, ADAFRUIT_KEY)
 
 if not UNSPLASH_KEY:
     raise EnvironmentError("Couldn't find any Unsplash key!")
