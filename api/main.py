@@ -1,7 +1,7 @@
 import os
 import requests
 from flask import Flask, request, jsonify, redirect
-from Adafruit_IO import Client
+from Adafruit_IO import Client, Data
 from dotenv import load_dotenv
 from flask_cors import CORS
 from mongo_client import mongo_client
@@ -78,11 +78,11 @@ def signup():
 
 @app.route("/dashboard", methods=["GET", "POST"])
 @jwt_required()
-def images():
+def dashboard():
     if request.method == "GET":
         current_user = get_jwt_identity()
         user_db = users_collection.find_one({"username": current_user})
-        hum = aio.receive("humidity")
+        #hum = aio.receive("humidity")
         temp = aio.receive("temperature")
         
         list_of_user_images_id = user_db["my_images"]
@@ -91,10 +91,16 @@ def images():
             image = images_collection.find_one({"_id": id})
             images.append(image)
 
-        return {"humidity": hum.value, "temperature": temp.value}
+        return {"temperature": temp.value}
     
     if request.method == "POST":
-        image = request.get_json()
+        data = request.get_json()
+        temp_to_send = Data(value=data["temperature"])
+        aio.create_data("setuptemperature", temp_to_send)
+        
+        return {"changed": data["temperature"]}
+        
+        
         image["_id"] = image.get("id")
         image["count"] = 1
         
@@ -110,7 +116,7 @@ def images():
         users_collection.update_one({"_id": user_db["_id"]}, {"$set": {"my_images": list_of_user_images_id}})
         
         inserted_id = result.inserted_id
-        return {"inserted_id": inserted_id}
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5051)

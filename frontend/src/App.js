@@ -95,7 +95,7 @@ function App() {
                 <GaugeTemp data={actualTemperature} />
               </Col>
               <Col className="pb-3">
-                <GaugeSetTemp temp ={temperature} setTemperature={setTemperature} />
+                <GaugeSetTemp token={token} temp={temperature} setTemperature={setTemperature} />
               </Col>
             </Row>
 

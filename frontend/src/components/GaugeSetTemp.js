@@ -1,8 +1,28 @@
 import React from "react";
 import { Button, Container, Row, Col } from "react-bootstrap";
 import GaugeComponent from "react-gauge-component";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const GaugeSetTemp = ({ temp, setTemperature }) => {
+const API_URL = process.env.REACT_APP_API_URL || "https://alolprojectspace.com";
+
+
+const setNewTemperature = async (token, temp, credentials) => {
+  try {
+    const result = await axios.post(`${API_URL}/dashboard`, credentials, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (result?.data?.changed) {
+      toast.success(`The temperature was chenged to ${temp} degree!`);
+    }
+  } catch (error) {
+    toast.error(error.message);
+    console.log(error);
+  }
+};
+
+const GaugeSetTemp = ({ token, temp, setTemperature }) => {
 
   const minusTemp = () => {
     if (temp === -20)
@@ -15,6 +35,7 @@ const GaugeSetTemp = ({ temp, setTemperature }) => {
       return 60;
     return temp + 1;
   };
+
 
   return (
     <>
@@ -82,7 +103,7 @@ const GaugeSetTemp = ({ temp, setTemperature }) => {
       <Button variant="outline-success" size="lg" style={{textAlign:"center", width: '20%', fontSize:"30px"}} onClick={() => setTemperature(minusTemp)}>
         -
       </Button>{' '}
-      <Button variant="outline-success" size="lg" style={{textAlign:"center", width: '30%', fontSize:"30px"}} onClick={() => setTemperature(minusTemp)}>
+      <Button variant="outline-success" size="lg" style={{textAlign:"center", width: '30%', fontSize:"30px"}} onClick={() => setNewTemperature(token, temp, {temperature: temp})}>
         SET
       </Button>{' '}
       <Button variant="outline-success" size="lg" style={{textAlign:"center", width: '20%', fontSize:"30px"}} onClick={() => setTemperature(plusTemp)}>
