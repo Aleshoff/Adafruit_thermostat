@@ -7,32 +7,23 @@ from flask_cors import CORS
 from mongo_client import mongo_client
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 import re
-from datetime import datetime
-from datetime import timedelta
-from datetime import timezone
+from datetime import timedelta, datetime
 
-gallery_db = mongo_client.gallery
-images_collection = gallery_db.images
-users_collection = gallery_db.users
+thermostat_db = mongo_client.thermostat
+statistics_collection = thermostat_db.statistics
+users_collection = thermostat_db.users
 
 load_dotenv(dotenv_path="./.env.local")
 
-UNSPLASH_URL = "https://api.unsplash.com/photos/random"
-UNSPLASH_KEY = os.environ.get("UNSPLASH_KEY", "")
 DEBUG = bool(os.environ.get("DEBUG", True))
 ADAFRUIT_KEY = os.environ.get("ADAFRUIT_KEY", "")
 ADAFRUIT_NAME = os.environ.get("ADAFRUIT_NAME", "")
 
 aio = Client(ADAFRUIT_NAME, ADAFRUIT_KEY)
 
-if not UNSPLASH_KEY:
-    raise EnvironmentError("Couldn't find any Unsplash key!")
-
 app = Flask(__name__)
 CORS(app)
 
-#app.config["JWT_COOKIE_SECURE"] = False
-#app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
 app.config["JWT_SECRET_KEY"] = "alesh"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=8)
 jwt = JWTManager(app)
@@ -71,7 +62,7 @@ def signup():
     if users_collection.find_one({"username": username}):
         return {"error": "Such user already exists!"}
     
-    user["my_images"] = []
+    #user["my_interventions"] = []
     result = users_collection.insert_one(user)
     inserted_id = str(result.inserted_id)
     return {"inserted_id": inserted_id}
@@ -80,23 +71,23 @@ def signup():
 @jwt_required()
 def dashboard():
     if request.method == "GET":
-        current_user = get_jwt_identity()
-        user_db = users_collection.find_one({"username": current_user})
-        #hum = aio.receive("humidity")
         temp = aio.receive("temperature")
         
-        list_of_user_images_id = user_db["my_images"]
-        images = []
-        for id in list_of_user_images_id:
-            image = images_collection.find_one({"_id": id})
-            images.append(image)
+        #list_of_user_images_id = user_db["my_images"]
+        #images = []
+        #for id in list_of_user_images_id:
+        #    image = images_collection.find_one({"_id": id})
+        #    images.append(image)
 
         return {"temperature": temp.value}
     
     if request.method == "POST":
+        current_user = get_jwt_identity()
         data = request.get_json()
         temp_to_send = Data(value=data["temperature"])
         aio.create_data("setuptemperature", temp_to_send)
+        
+        statistics_collection.insert_one({"username": current_user, "interventionTime": datetime.now(), "temperature": data["temperature"]})
         
         return {"changed": data["temperature"]}
         

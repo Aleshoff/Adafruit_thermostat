@@ -58,7 +58,7 @@ function App() {
   if (!token) {
     return (
       <div>
-        <Header title="Photo Gallery" />
+        <Header title="Thermostat" />
         {isSignUped ? (
           <Login setToken={setToken} setIsSignUped={setIsSignUped} />
         ) : (
@@ -76,7 +76,7 @@ function App() {
 
   return (
     <div>
-      <Header title="Photo Gallery" />
+      <Header title="Thermostat" />
       <br />
       <Navbar data-bs-theme="light">
         <Container className="justify-content-end">
