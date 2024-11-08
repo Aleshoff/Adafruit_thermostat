@@ -10,7 +10,7 @@ const API_URL = process.env.REACT_APP_API_URL || "https://alolprojectspace.com";
 const logingStyle = { 
   position: "absolute", 
    top: "calc(25%)", 
-   left : "calc(50% - 19rem)"
+   left : "calc(40%)"
 };
 
 

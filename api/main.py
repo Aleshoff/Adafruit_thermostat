@@ -8,9 +8,12 @@ from mongo_client import mongo_client
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 import re
 from datetime import timedelta, datetime
+import time
+import threading
 
 thermostat_db = mongo_client.thermostat
-statistics_collection = thermostat_db.statistics
+interactions_collection = thermostat_db.interactions
+statistics_collection = thermostat_db.temperatures
 users_collection = thermostat_db.users
 
 load_dotenv(dotenv_path="./.env.local")
@@ -27,8 +30,9 @@ CORS(app)
 app.config["JWT_SECRET_KEY"] = "alesh"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=8)
 jwt = JWTManager(app)
-
 app.config["DEBUG"] = DEBUG
+
+
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -73,13 +77,18 @@ def dashboard():
     if request.method == "GET":
         temp = aio.receive("temperature")
         
+        last_set_temperature = interactions_collection.find().sort("_id", -1).limit(1)
+        data = last_set_temperature[0]
+        
+        
         #list_of_user_images_id = user_db["my_images"]
         #images = []
         #for id in list_of_user_images_id:
         #    image = images_collection.find_one({"_id": id})
         #    images.append(image)
 
-        return {"temperature": temp.value}
+        return {"temperature": temp.value, "setTemperature": data["temperature"]}
+    #, ""setTemperature": last_set_temperature["temperature"]
     
     if request.method == "POST":
         current_user = get_jwt_identity()
@@ -87,7 +96,7 @@ def dashboard():
         temp_to_send = Data(value=data["temperature"])
         aio.create_data("setuptemperature", temp_to_send)
         
-        statistics_collection.insert_one({"username": current_user, "interventionTime": datetime.now(), "temperature": data["temperature"]})
+        interactions_collection.insert_one({"username": current_user, "interventionTime": datetime.now(), "temperature": data["temperature"]})
         
         return {"changed": data["temperature"]}
         
@@ -109,5 +118,13 @@ def dashboard():
         inserted_id = result.inserted_id
 
 
+def get_statistics():
+    while True:
+        temp = aio.receive("temperature")
+        statistics_collection.insert_one({"time": datetime.now(), "temperature": temp.value})
+        time.sleep(60)
+
 if __name__ == "__main__":
+    t1 = threading.Thread(target=get_statistics, args=())
+    t1.start()
     app.run(host="0.0.0.0", port=5051)

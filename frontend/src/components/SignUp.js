@@ -9,7 +9,7 @@ const API_URL = process.env.REACT_APP_API_URL || "https://alolprojectspace.com";
 const signUpStyle = { 
   position: "absolute", 
   top: "calc(25%)", 
-  left : "calc(50% - 22rem)"
+  left : "calc(40%)"
 };
 
 

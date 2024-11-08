@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import GaugeSetTemp from "./components/GaugeSetTemp";
 import GaugeTemp from "./components/GaugeTemp";
+import Chart from "./components/Chart";
 import axios from "axios";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -17,8 +18,8 @@ import SignUp from "./components/SignUp";
 const API_URL = process.env.REACT_APP_API_URL || "https://alolprojectspace.com";
 
 function App() {
-  const [temperature, setTemperature] = useState(23);
-  const [actualTemperature, getTemperature] = useState(0);
+  const [temperature, setNewTemperature] = useState(23);
+  const [actualTemperature, setActualTemperature] = useState(0);
   const [loader, setLoader] = useState(true);
   const { token, setToken } = useToken();
   const [isSignUped, setIsSignUped] = useState(true);
@@ -28,7 +29,8 @@ function App() {
       const result = await axios.get(`${API_URL}/dashboard`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      getTemperature(parseFloat(result.data.temperature) || 0);
+      setActualTemperature(parseFloat(result.data.temperature) || 0);
+      setNewTemperature(result.data.setTemperature);
       setLoader(false);
     } catch (error) {
       console.log(error);
@@ -51,9 +53,6 @@ function App() {
     }
   }, [token]);
 
-  useEffect(() => {
-    
-  }, [temperature]);
 
   if (!token) {
     return (
@@ -89,15 +88,20 @@ function App() {
         <Spinner />
       ) : (
         <>
-          <Container className="mt-4">
+          <Container className="mt-2" style={{width:"1000px"}}>
             <Row xs={1} md={2} lg={2}>
               <Col className="pb-3">
                 <GaugeTemp data={actualTemperature} />
               </Col>
               <Col className="pb-3">
-                <GaugeSetTemp token={token} temp={temperature} setTemperature={setTemperature} />
+                <GaugeSetTemp token={token} temp={temperature} setTemperature={setNewTemperature} />
               </Col>
             </Row>
+            <Row xs={1} md={1} lg={1}>
+              <Col className="pb-4">
+                <Chart />
+              </Col>
+              </Row>
 
             <Navbar style={{ maxWidth: "20rem", height: "4rem" }} />
           </Container>
