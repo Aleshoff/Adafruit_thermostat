@@ -79,16 +79,18 @@ def dashboard():
         
         last_set_temperature = interactions_collection.find().sort("_id", -1).limit(1)
         data = last_set_temperature[0]
+        last_statistics_fromDB = statistics_collection.find({}).sort("_id", -1).limit(20)
+        statistics = []
+        count = 0
+        for item in last_statistics_fromDB:
+            count = count + 1
+            newItem = {"time": item["time"], "temperature": item["temperature"]}
+            if count%2 == 0:
+                statistics.append(newItem)
+        list_to_send = reversed(statistics)
         
-        
-        #list_of_user_images_id = user_db["my_images"]
-        #images = []
-        #for id in list_of_user_images_id:
-        #    image = images_collection.find_one({"_id": id})
-        #    images.append(image)
 
-        return {"temperature": temp.value, "setTemperature": data["temperature"]}
-    #, ""setTemperature": last_set_temperature["temperature"]
+        return {"temperature": temp.value, "setTemperature": data["temperature"], "statistics": list_to_send}
     
     if request.method == "POST":
         current_user = get_jwt_identity()
@@ -100,29 +102,23 @@ def dashboard():
         
         return {"changed": data["temperature"]}
         
-        
-        image["_id"] = image.get("id")
-        image["count"] = 1
-        
-        if images_collection.find_one({"_id": image["_id"]}):
-            result = images_collection.update_one({"_id": image["_id"]}, {"$inc": {"count": 1}})
-        else:
-            result = images_collection.insert_one(image)
-            
+@app.route("/save", methods=["POST"])
+@jwt_required()
+def save():
+    if request.method == "POST":
         current_user = get_jwt_identity()
-        user_db = users_collection.find_one({"username": current_user})
-        list_of_user_images_id = user_db["my_images"]
-        list_of_user_images_id.append(image["_id"])
-        users_collection.update_one({"_id": user_db["_id"]}, {"$set": {"my_images": list_of_user_images_id}})
+        data = request.get_json()
+        temp_to_save = data["temperature"]
+        statistics_collection.insert_one({"time": datetime.today(), "temperature": temp_to_save})
         
-        inserted_id = result.inserted_id
-
+        return {"saved": data["temperature"]}
+        
 
 def get_statistics():
     while True:
         temp = aio.receive("temperature")
-        statistics_collection.insert_one({"time": datetime.now(), "temperature": temp.value})
-        time.sleep(60)
+        statistics_collection.insert_one({"time": datetime.today(), "temperature": temp.value})
+        time.sleep(300)
 
 if __name__ == "__main__":
     t1 = threading.Thread(target=get_statistics, args=())

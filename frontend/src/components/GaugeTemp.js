@@ -1,8 +1,27 @@
 import React from "react";
 import { Button, Container, Row, Col } from "react-bootstrap";
 import GaugeComponent from "react-gauge-component";
+import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const GaugeTemp = ({ data }) => {
+const API_URL = process.env.REACT_APP_API_URL || "https://alolprojectspace.com";
+
+const saveTemperature = async (token, data, credentials) => {
+  try {
+    const result = await axios.post(`${API_URL}/save`, credentials, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (result?.data?.saved) {
+      toast.success(`The temperature ${data} was saved to DB`);
+    }
+  } catch (error) {
+    toast.error(error.message);
+    console.log(error);
+  }
+};
+
+const GaugeTemp = ({ data, token }) => {
   return (
     <>
     <Container >
@@ -66,7 +85,7 @@ const GaugeTemp = ({ data }) => {
   maxValue={60}
 />
 <div style={{textAlign:"center"}}>
-      <Button variant="outline-success" size="lg" style={{textAlign:"center", width: '50%', fontSize:"30px"}} >
+      <Button variant="outline-success" size="lg" style={{textAlign:"center", width: '50%', fontSize:"30px"}} onClick={() => saveTemperature(token, data, {temperature: data})}>
         SAVE TO DB
       </Button>
     </div>

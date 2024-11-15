@@ -20,6 +20,7 @@ const API_URL = process.env.REACT_APP_API_URL || "https://alolprojectspace.com";
 function App() {
   const [temperature, setNewTemperature] = useState(23);
   const [actualTemperature, setActualTemperature] = useState(0);
+  const [statisticsTemperatures, setStatisticsTemperatures] = useState([]);
   const [loader, setLoader] = useState(true);
   const { token, setToken } = useToken();
   const [isSignUped, setIsSignUped] = useState(true);
@@ -31,6 +32,7 @@ function App() {
       });
       setActualTemperature(parseFloat(result.data.temperature) || 0);
       setNewTemperature(result.data.setTemperature);
+      setStatisticsTemperatures(result.data.statistics);
       setLoader(false);
     } catch (error) {
       console.log(error);
@@ -91,7 +93,7 @@ function App() {
           <Container className="mt-2" style={{width:"1000px"}}>
             <Row xs={1} md={2} lg={2}>
               <Col className="pb-3">
-                <GaugeTemp data={actualTemperature} />
+                <GaugeTemp data={actualTemperature } token={token}/>
               </Col>
               <Col className="pb-3">
                 <GaugeSetTemp token={token} temp={temperature} setTemperature={setNewTemperature} />
@@ -99,7 +101,7 @@ function App() {
             </Row>
             <Row xs={1} md={1} lg={1}>
               <Col className="pb-4">
-                <Chart />
+                <Chart data={statisticsTemperatures}/>
               </Col>
               </Row>
 
