@@ -11,51 +11,6 @@ import {
   Label,
 } from "recharts";
 
-const a = [
-  {
-    name: "Page A",
-    uv: -20,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    uv: 0,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    uv: 10,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    uv: 23,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    uv: 60,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    uv: 15,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    uv: 21,
-    pv: 4300,
-    amt: 2100,
-  },
-];
-
 const gradientOffset = (data) => {
   console.log(data);
   const dataMax = Math.max(...data.map((i) => i.temperature));
@@ -71,7 +26,6 @@ const gradientOffset = (data) => {
   return dataMax / (dataMax - dataMin);
 };
 
-//const off = gradientOffset();
 
 export default function Chart(data) {
   
@@ -97,13 +51,13 @@ export default function Chart(data) {
       }}
     >
       <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="time" style={{ fontSize: "10px" }}>
+      <XAxis dataKey="time" style={{ fontSize: "10px" }} interval={1}>
         <Label position="insideBottomRight" style={{ fontSize: "20px" }}>
           Time
         </Label>
       </XAxis>
 
-      <YAxis style={{ fontSize: "20" }} label={{ fontSize: "20px" }} ticks={[-20, 0, 20, 40, 60]} domain={[-20, 60]} interval={0}>
+      <YAxis style={{ fontSize: "20" }} label={{ fontSize: "20px" }} minTickGap={2} interval={0} ticks={[-20, 0, 20, 40, 60]} >
         <Label position="insideLeft" angle="-90" style={{ fontSize: "20px" }}>
           Temp, gr.C
         </Label>

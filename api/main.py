@@ -86,11 +86,11 @@ def dashboard():
             count = count + 1
             newItem = {"time": item["time"], "temperature": item["temperature"]}
             if count%2 == 0:
-                statistics.append(newItem)
-        list_to_send = reversed(statistics)
+                statistics.insert(0, newItem)
+        #list_to_send = reversed(statistics)
         
 
-        return {"temperature": temp.value, "setTemperature": data["temperature"], "statistics": list_to_send}
+        return {"temperature": temp.value, "setTemperature": data["temperature"], "statistics": statistics}
     
     if request.method == "POST":
         current_user = get_jwt_identity()
@@ -124,3 +124,5 @@ if __name__ == "__main__":
     t1 = threading.Thread(target=get_statistics, args=())
     t1.start()
     app.run(host="0.0.0.0", port=5051)
+    
+    #ticks={[-20, 0, 20, 40, 60]} domain={[-20, 60]} interval={0}
